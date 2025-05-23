@@ -57,6 +57,7 @@ export function copyToClipboard(
         buttonElement.innerHTML = originalButtonText;
       }, 2000);
     } catch(copyErr) {
+      console.error('Failed to copy: ', copyErr);
       alert('Failed to copy. Please manually copy the text.');
     }
   });
