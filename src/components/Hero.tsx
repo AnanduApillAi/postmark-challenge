@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <section className="hero-section py-16 px-6 text-center">
       <div className="container mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">Drop Us a Line, We'll Share the Love</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">Drop Us a Line, We&apos;ll Share the Love</h1>
         <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
           Send your testimonial via email and see it featured here. Your words help others discover how we can make a difference!
         </p>
