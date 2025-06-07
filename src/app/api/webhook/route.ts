@@ -94,10 +94,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert testimonial into Supabase
-    const { data: insertedData, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from('testimonials')
-      .insert([testimonialData])
-      .select();
+      .insert([testimonialData]);
 
     if (error) {
       console.error('Error inserting testimonial:', error);
