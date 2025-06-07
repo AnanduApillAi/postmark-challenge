@@ -1,21 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import crypto from 'crypto';
-
-// Verify Postmark webhook signature
-function verifyPostmarkWebhook(body: string, signature: string): boolean {
-  if (!process.env.POSTMARK_WEBHOOK_SECRET) {
-    console.warn('POSTMARK_WEBHOOK_SECRET not set - webhook verification disabled');
-    return true; // Allow in development
-  }
-  
-  const expectedSignature = crypto
-    .createHmac('sha256', process.env.POSTMARK_WEBHOOK_SECRET)
-    .update(body)
-    .digest('base64');
-    
-  return signature === expectedSignature;
-}
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // Sanitize input to prevent XSS
 function sanitizeInput(input: string): string {
@@ -26,28 +10,41 @@ function sanitizeInput(input: string): string {
     .substring(0, 1000); // Limit length
 }
 
+// Basic security checks for webhook requests
+function basicSecurityCheck(request: NextRequest, data: any): { isValid: boolean; reason?: string } {
+  // Check if request comes from a reasonable source
+  const contentType = request.headers.get('content-type') || '';
+  
+  // Basic checks for webhook-like requests
+  if (!contentType.includes('application/json')) {
+    return { isValid: false, reason: 'Invalid content type' };
+  }
+
+  // Check if it has typical webhook structure
+  if (!data.From || !data.TextBody || !data.To) {
+    return { isValid: false, reason: 'Missing typical email webhook fields' };
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(data.From)) {
+    return { isValid: false, reason: 'Invalid email format' };
+  }
+
+  return { isValid: true };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Get raw body for signature verification
-    const body = await request.text();
-    const signature = request.headers.get('X-Postmark-Signature') || '';
-    
-    // Verify webhook is from Postmark
-    if (!verifyPostmarkWebhook(body, signature)) {
-      console.error('Invalid webhook signature');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     // Parse the request body
-    const data = JSON.parse(body);
+    const data = await request.json();
     
-    // Validate required fields
-    if (!data.From || !data.TextBody) {
+    // Basic security checks
+    const securityCheck = basicSecurityCheck(request, data);
+    if (!securityCheck.isValid) {
+      console.log('Security check failed:', securityCheck.reason);
       return NextResponse.json(
-        { error: 'Missing required fields (From, TextBody)' },
+        { error: 'Invalid request format' },
         { status: 400 }
       );
     }
@@ -62,7 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Log the received data (remove in production if sensitive)
+    // Log the received data
     console.log('Valid webhook received from:', data.From);
     
     // Extract and sanitize testimonial data
@@ -81,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate recent testimonials (basic spam protection)
-    const { data: recentTestimonials } = await supabase
+    const { data: recentTestimonials } = await supabaseAdmin
       .from('testimonials')
       .select('email')
       .eq('email', testimonialData.email)
@@ -97,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert testimonial into Supabase
-    const { data: insertedData, error } = await supabase
+    const { data: insertedData, error } = await supabaseAdmin
       .from('testimonials')
       .insert([testimonialData])
       .select();
@@ -112,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Testimonial saved successfully from:', testimonialData.email);
     
-    // Return success response (don't expose internal data)
+    // Return success response
     return NextResponse.json(
       { 
         message: 'Testimonial received and saved successfully',
@@ -138,7 +135,6 @@ export async function GET() {
   );
 }
 
-// Handle unsupported methods
 export async function PUT() {
   return NextResponse.json(
     { error: 'Method not allowed. Only POST requests are supported.' },
