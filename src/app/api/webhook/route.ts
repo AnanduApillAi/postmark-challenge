@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
+interface PostmarkWebhookPayload {
+  FromName?: string;
+  From?: string;
+  To?: string;
+  TextBody?: string;
+  HtmlBody?: string;
+}
+
 // Sanitize input to prevent XSS
 function sanitizeInput(input: string): string {
   return input
@@ -11,7 +19,7 @@ function sanitizeInput(input: string): string {
 }
 
 // Basic security checks for webhook requests
-function basicSecurityCheck(request: NextRequest, data: any): { isValid: boolean; reason?: string } {
+function basicSecurityCheck(request: NextRequest, data: PostmarkWebhookPayload): { isValid: boolean; reason?: string } {
   // Check if request comes from a reasonable source
   const contentType = request.headers.get('content-type') || '';
   
@@ -37,7 +45,7 @@ function basicSecurityCheck(request: NextRequest, data: any): { isValid: boolean
 export async function POST(request: NextRequest) {
   try {
     // Parse the request body
-    const data = await request.json();
+    const data: PostmarkWebhookPayload = await request.json();
     
     // Basic security checks
     const securityCheck = basicSecurityCheck(request, data);
@@ -64,9 +72,9 @@ export async function POST(request: NextRequest) {
     
     // Extract and sanitize testimonial data
     const testimonialData = {
-      name: sanitizeInput(data.FromName || data.From || 'Anonymous'),
-      email: data.From.toLowerCase().trim(),
-      message: sanitizeInput(data.TextBody || data.HtmlBody?.replace(/<[^>]*>/g, '') || 'No message content')
+      name: sanitizeInput(data.FromName || data.From! || 'Anonymous'),
+      email: data.From!.toLowerCase().trim(),
+      message: sanitizeInput(data.TextBody! || data.HtmlBody?.replace(/<[^>]*>/g, '') || 'No message content')
     };
 
     // Validate message is not empty after sanitization
