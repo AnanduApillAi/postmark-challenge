@@ -7,6 +7,9 @@ interface Testimonial {
   email: string;
   message: string;
   created_at: string;
+  sentiment_score?: number;
+  sentiment_category?: string;
+  is_testimonial_confidence?: number;
 }
 
 interface TestimonialsGalleryProps {
@@ -58,14 +61,25 @@ const getTimeAgo = (dateString: string) => {
 
 export default function TestimonialsGallery({ testimonials, loading }: TestimonialsGalleryProps) {
   // Transform database testimonials to match TestimonialCard props
-  const transformedTestimonials = testimonials.map((testimonial) => ({
-    id: testimonial.id,
-    rating: Math.floor(Math.random() * 2) + 4, // Random rating between 4-5
-    isVerified: testimonial.email.includes('@'), // Verify if email is present
-    content: `"${testimonial.message}"`,
-    author: testimonial.name || 'Anonymous',
-    timeAgo: getTimeAgo(testimonial.created_at)
-  }));
+  const transformedTestimonials = testimonials.map((testimonial) => {
+    // Calculate rating based on sentiment score
+    let rating = 4; // Default rating
+    if (testimonial.sentiment_score) {
+      if (testimonial.sentiment_score >= 80) rating = 5;
+      else if (testimonial.sentiment_score >= 60) rating = 4.5;
+      else if (testimonial.sentiment_score >= 40) rating = 4;
+      else rating = 3.5;
+    }
+
+    return {
+      id: testimonial.id,
+      rating: rating,
+      isVerified: testimonial.email.includes('@'), // Verify if email is present
+      content: `"${testimonial.message}"`,
+      author: testimonial.name || 'Anonymous',
+      timeAgo: getTimeAgo(testimonial.created_at)
+    };
+  });
 
   // Use database testimonials if available, otherwise fallback to sample data
   const displayTestimonials = testimonials.length > 0 ? transformedTestimonials : SAMPLE_TESTIMONIALS;

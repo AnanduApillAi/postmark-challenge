@@ -12,6 +12,9 @@ interface Testimonial {
   email: string;
   message: string;
   created_at: string;
+  sentiment_score?: number;
+  sentiment_category?: string;
+  is_testimonial_confidence?: number;
 }
 
 export default function Home() {
@@ -25,10 +28,20 @@ export default function Home() {
         console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
         console.log('SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
         
+        // Fetch testimonials (with fallback for before migration)
         const { data, error } = await supabase
           .from('testimonials')
           .select('*')
           .order('created_at', { ascending: false });
+
+        // Filter positive testimonials on client side if LLM columns exist
+        let filteredData = data;
+        if (data && data.length > 0 && data[0].sentiment_score !== undefined) {
+          filteredData = data.filter(testimonial => 
+            testimonial.sentiment_score >= 20 && 
+            !['negative', 'very_negative'].includes(testimonial.sentiment_category)
+          );
+        }
 
         console.log('Supabase response:', { data, error });
         if (error) {
@@ -40,7 +53,7 @@ export default function Home() {
             code: error.code
           });
         } else {
-          setTestimonials(data || []);
+          setTestimonials(filteredData || []);
         }
       } catch (error) {
         console.error('Error fetching testimonials:', error);
