@@ -100,7 +100,7 @@ export default function FixedBottomNav() {
             <div className="flex items-start justify-between p-6 pb-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Share Your Story</h2>
-                <p className="text-gray-600 text-sm mt-1">We'd love to hear from you. Here's how to get started.</p>
+                <p className="text-gray-600 text-sm mt-1">We&rsquo;d love to hear from you. Here&rsquo;s how to get started.</p>
               </div>
               <button
                 onClick={closeModal}
@@ -164,7 +164,7 @@ export default function FixedBottomNav() {
 
               {/* Note */}
               <p className="text-sm text-gray-400 text-left">
-                Send us your testimonial to <a href={`mailto:${email}`} className="text-gray-600 hover:text-blue-700">{email}</a> and we'll add it to our wall of love.
+                Send us your testimonial to <a href={`mailto:${email}`} className="text-gray-600 hover:text-blue-700">{email}</a> and we&rsquo;ll add it to our wall of love.
               </p>
             </div>
           </div>
