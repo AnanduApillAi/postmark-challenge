@@ -8,6 +8,10 @@ interface PostmarkWebhookPayload {
   To?: string;
   TextBody?: string;
   HtmlBody?: string;
+  Subject?: string;
+  MessageID?: string;
+  Date?: string;
+  Headers?: Array<{ Name: string; Value: string }>;
 }
 
 // Sanitize input to prevent XSS
@@ -69,13 +73,33 @@ export async function POST(request: NextRequest) {
     }
     
     // Log the received data
-    console.log('Valid webhook received from:', data);
+    console.log('Valid webhook received from:', data.From);
     
+    // Extract spam detection data from headers
+    const getSpamData = () => {
+      if (!data.Headers) return { score: 0.0, status: 'unknown' };
+      
+      const spamScoreHeader = data.Headers.find(h => h.Name === 'X-Spam-Score');
+      const spamStatusHeader = data.Headers.find(h => h.Name === 'X-Spam-Status');
+      
+      const score = spamScoreHeader ? parseFloat(spamScoreHeader.Value) || 0.0 : 0.0;
+      const status = spamStatusHeader ? spamStatusHeader.Value.toLowerCase() : 'unknown';
+      
+      return { score, status };
+    };
+
+    const spamData = getSpamData();
+
     // Extract and sanitize testimonial data
     const testimonialData = {
       name: sanitizeInput(data.FromName || data.From! || 'Anonymous'),
       email: data.From!.toLowerCase().trim(),
-      message: sanitizeInput(data.TextBody! || data.HtmlBody?.replace(/<[^>]*>/g, '') || 'No message content')
+      message: sanitizeInput(data.TextBody! || data.HtmlBody?.replace(/<[^>]*>/g, '') || 'No message content'),
+      message_id: data.MessageID || null,
+      subject: sanitizeInput(data.Subject || 'No Subject'),
+      email_date: data.Date ? new Date(data.Date).toISOString() : new Date().toISOString(),
+      spam_score: spamData.score,
+      spam_status: spamData.status
     };
 
     // Validate message is not empty after sanitization
@@ -86,7 +110,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for duplicate recent testimonials (basic spam protection)
+    // Check for duplicate testimonials using message ID (more accurate than email + time)
+    if (testimonialData.message_id) {
+      const { data: duplicateMessage } = await supabaseAdmin
+        .from('testimonials')
+        .select('message_id')
+        .eq('message_id', testimonialData.message_id)
+        .limit(1);
+
+      if (duplicateMessage && duplicateMessage.length > 0) {
+        console.log(`Duplicate message: ${testimonialData.message_id} from ${testimonialData.email}`);
+        return NextResponse.json(
+          { message: 'Testimonial already processed (duplicate message ID)' },
+          { status: 200 }
+        );
+      }
+    }
+
+    // Fallback: Check for duplicate recent testimonials (basic spam protection)
     const { data: recentTestimonials } = await supabaseAdmin
       .from('testimonials')
       .select('email')

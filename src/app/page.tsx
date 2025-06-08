@@ -12,6 +12,10 @@ interface Testimonial {
   email: string;
   message: string;
   created_at: string;
+  email_date?: string;
+  subject?: string;
+  spam_score?: number;
+  spam_status?: string;
   sentiment_score?: number;
   sentiment_category?: string;
   is_testimonial_confidence?: number;
@@ -28,10 +32,11 @@ export default function Home() {
         console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
         console.log('SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
         
-        // Fetch testimonials - let client handle time calculation for now
+        // Fetch testimonials with all fields including new enhanced data
         const { data, error } = await supabase
           .from('testimonials')
           .select('*')
+          .order('email_date', { ascending: false, nullsFirst: false })
           .order('created_at', { ascending: false });
 
         // Filter positive testimonials on client side if LLM columns exist

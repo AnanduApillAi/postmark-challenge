@@ -7,6 +7,10 @@ interface Testimonial {
   email: string;
   message: string;
   created_at: string;
+  email_date?: string;
+  subject?: string;
+  spam_score?: number;
+  spam_status?: string;
   sentiment_score?: number;
   sentiment_category?: string;
   is_testimonial_confidence?: number;
@@ -82,13 +86,20 @@ const getTimeAgo = (dateString: string) => {
 export default function TestimonialsGallery({ testimonials, loading }: TestimonialsGalleryProps) {
   // Transform database testimonials to match TestimonialCard props
   const transformedTestimonials = testimonials.map((testimonial) => {
-    // Calculate time ago
-    const timeAgoResult = getTimeAgo(testimonial.created_at);
+    // Use email_date if available (more accurate), otherwise fall back to created_at
+    const dateToUse = testimonial.email_date || testimonial.created_at;
+    const timeAgoResult = getTimeAgo(dateToUse);
+
+    // Create content with subject if it's not "No Subject"
+    const hasSubject = testimonial.subject && testimonial.subject !== 'No Subject';
+    const content = hasSubject 
+      ? `"${testimonial.subject}" - ${testimonial.message}`
+      : `"${testimonial.message}"`;
 
     return {
       id: testimonial.id,
-      isVerified: testimonial.email.includes('@'), // Verify if email is present
-      content: `"${testimonial.message}"`,
+      isVerified: testimonial.email.includes('@'), // Verify if email is present  
+      content: content,
       author: testimonial.name || 'Anonymous',
       timeAgo: timeAgoResult
     };
