@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Log the received data
-    console.log('Valid webhook received from:', data.From);
+    console.log('Valid webhook received from:', data);
     
     // Extract and sanitize testimonial data
     const testimonialData = {
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       .select('email')
       .eq('email', testimonialData.email)
       .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()) // Last hour
-      .limit(1);
+      .limit(3);
 
     if (recentTestimonials && recentTestimonials.length > 0) {
       console.log(`Rate limit: Recent testimonial from ${testimonialData.email}`);

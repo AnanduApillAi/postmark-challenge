@@ -21,7 +21,6 @@ interface TestimonialsGalleryProps {
 const SAMPLE_TESTIMONIALS = [
   {
     id: 1,
-    rating: 4,
     isVerified: true,
     content: '"This product has revolutionized my workflow. I can\'t imagine going back to my old methods. The ease of use is incredible!"',
     author: 'Sarah Miller',
@@ -29,7 +28,6 @@ const SAMPLE_TESTIMONIALS = [
   },
   {
     id: 2,
-    rating: 5,
     isVerified: false,
     content: '"I was skeptical at first, but this exceeded my expectations. Highly recommend to anyone on the fence. It\'s a game-changer for real."',
     author: 'Anonymous',
@@ -37,7 +35,6 @@ const SAMPLE_TESTIMONIALS = [
   },
   {
     id: 3,
-    rating: 4.5,
     isVerified: true,
     content: '"The customer support is top-notch. They were quick to respond and very helpful with my questions. Made the whole process smooth."',
     author: 'David Chen',
@@ -45,39 +42,55 @@ const SAMPLE_TESTIMONIALS = [
   }
 ];
 
-// Helper function to calculate time ago
+
+
+// Improved function to calculate time ago with better precision
 const getTimeAgo = (dateString: string) => {
-  const date = new Date(dateString);
+  // Parse the timestamp as UTC (database stores in UTC but without Z suffix)
+  // Add 'Z' suffix if not present to force UTC parsing
+  const utcDateString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+  const date = new Date(utcDateString);
   const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
   
-  if (diffInHours < 1) return 'Just now';
-  if (diffInHours < 24) return `${diffInHours} hours ago`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays} days ago`;
+  // Both dates are now in local timezone, calculate the difference in milliseconds
+  const diffInMs = now.getTime() - date.getTime();
+  
+  // Handle negative differences (future dates) or very small differences
+  if (diffInMs < 0 || diffInMs < 30000) return 'Just now'; // Less than 30 seconds
+  
+  // Convert to different time units
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
   const diffInWeeks = Math.floor(diffInDays / 7);
-  return `${diffInWeeks} weeks ago`;
+  const diffInMonths = Math.floor(diffInDays / 30);
+  
+  // Return appropriate time string with proper pluralization
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+  } else if (diffInDays < 7) {
+    return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+  } else if (diffInWeeks < 4) {
+    return `${diffInWeeks} week${diffInWeeks === 1 ? '' : 's'} ago`;
+  } else {
+    return `${diffInMonths} month${diffInMonths === 1 ? '' : 's'} ago`;
+  }
 };
 
 export default function TestimonialsGallery({ testimonials, loading }: TestimonialsGalleryProps) {
   // Transform database testimonials to match TestimonialCard props
   const transformedTestimonials = testimonials.map((testimonial) => {
-    // Calculate rating based on sentiment score
-    let rating = 4; // Default rating
-    if (testimonial.sentiment_score) {
-      if (testimonial.sentiment_score >= 80) rating = 5;
-      else if (testimonial.sentiment_score >= 60) rating = 4.5;
-      else if (testimonial.sentiment_score >= 40) rating = 4;
-      else rating = 3.5;
-    }
+    // Calculate time ago
+    const timeAgoResult = getTimeAgo(testimonial.created_at);
 
     return {
       id: testimonial.id,
-      rating: rating,
       isVerified: testimonial.email.includes('@'), // Verify if email is present
       content: `"${testimonial.message}"`,
       author: testimonial.name || 'Anonymous',
-      timeAgo: getTimeAgo(testimonial.created_at)
+      timeAgo: timeAgoResult
     };
   });
 
@@ -117,7 +130,6 @@ export default function TestimonialsGallery({ testimonials, loading }: Testimoni
             {displayTestimonials.map((testimonial) => (
               <TestimonialCard
                 key={testimonial.id}
-                rating={testimonial.rating}
                 isVerified={testimonial.isVerified}
                 content={testimonial.content}
                 author={testimonial.author}

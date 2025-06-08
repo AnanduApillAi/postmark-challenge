@@ -28,7 +28,7 @@ export default function Home() {
         console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
         console.log('SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
         
-        // Fetch testimonials (with fallback for before migration)
+        // Fetch testimonials - let client handle time calculation for now
         const { data, error } = await supabase
           .from('testimonials')
           .select('*')
