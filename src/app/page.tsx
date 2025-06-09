@@ -77,7 +77,7 @@ export default function Home() {
         <TestimonialsGrid testimonials={testimonials} loading={loading} />
         {/* Call to Action */}
         <div className="text-lg md:text-xl mt-8 w-fit mx-auto">
-          <p className="text-gray-700 font-medium">
+          <p className="text-gray-700 font-medium text-center md:text-left">
             Send us your review to{' '}
             <span className="text-blue-600 font-semibold px-2 py-1 rounded-md">
              <a href="mailto:testimonials@anandu.dev" target='_blank'>testimonials@anandu.dev</a>

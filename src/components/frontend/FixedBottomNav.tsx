@@ -37,6 +37,22 @@ export default function FixedBottomNav() {
     }
   }, [isModalOpen]);
 
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable scrolling
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function to ensure scrolling is re-enabled when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isModalOpen]);
+
   return (
     <>
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
