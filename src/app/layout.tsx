@@ -18,9 +18,16 @@ export const metadata: Metadata = {
   title: "Wall of Love — Powered by Postmark ",
   description: "A minimal, modern wall of love powered by Postmark's inbound email streaming, filtered by AI, and stored with Supabase.",
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' },
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+    ],
     shortcut: '/favicon.ico',
     apple: '/favicon.ico',
+    other: {
+      rel: 'icon',
+      url: '/favicon.ico',
+    },
   },
 };
 
@@ -32,6 +39,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <link
           href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
           rel="stylesheet"
