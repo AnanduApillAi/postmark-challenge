@@ -11,6 +11,7 @@ export interface TestimonialAnalysis {
   sentimentScore: number; // -100 to 100
   sentimentCategory: 'very_negative' | 'negative' | 'neutral' | 'positive' | 'very_positive';
   reasoning: string;
+  cleanedContent: string; // Extracted core testimonial content
 }
 
 // Sanitize content before sending to LLM (remove sensitive data)
@@ -36,6 +37,7 @@ export async function analyzeTestimonial(
     const prompt = `Analyze the following email content to determine:
 1. Is this a genuine testimonial/feedback about a product or service? (not spam, sales pitch, or unrelated content)
 2. What is the sentiment score from -100 (very negative) to 100 (very positive)?
+3. Extract ONLY the core testimonial content (remove greetings, signatures, email formalities, and redundant personal info)
 
 Email from: ${sanitizedName}
 Message: "${sanitizedMessage}"
@@ -46,14 +48,16 @@ Please respond with ONLY a JSON object in this exact format:
   "confidence": number (0-100),
   "sentimentScore": number (-100 to 100),
   "sentimentCategory": "very_negative" | "negative" | "neutral" | "positive" | "very_positive",
-  "reasoning": "brief explanation"
+  "reasoning": "brief explanation",
+  "cleanedContent": "extracted core testimonial without email fluff"
 }
 
 Classification criteria:
 - Testimonial: ANY genuine feedback about a service/product/experience (positive OR negative experiences)
 - Not testimonial: Spam, sales pitches, unrelated content, automated messages, general questions
 - Include negative reviews/complaints as testimonials if they describe actual experience with the product/service
-- Sentiment: Consider overall tone, specific words, and emotional expression`;
+- Sentiment: Consider overall tone, specific words, and emotional expression
+- Content extraction: Remove "Hi", "Hello", names, signatures, "Best regards", etc. Keep only the testimonial substance`;
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -85,7 +89,8 @@ Classification criteria:
       typeof analysis.confidence !== 'number' ||
       typeof analysis.sentimentScore !== 'number' ||
       !analysis.sentimentCategory ||
-      !analysis.reasoning
+      !analysis.reasoning ||
+      !analysis.cleanedContent
     ) {
       throw new Error('Invalid response structure from LLM');
     }
@@ -112,7 +117,8 @@ Classification criteria:
       confidence: 50, // Medium confidence since we couldn't analyze
       sentimentScore: 0, // Neutral sentiment
       sentimentCategory: 'neutral',
-      reasoning: `LLM analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      reasoning: `LLM analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      cleanedContent: message // Use original message as fallback
     };
   }
 }

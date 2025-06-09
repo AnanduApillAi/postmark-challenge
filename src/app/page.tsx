@@ -10,6 +10,7 @@ interface Testimonial {
   name: string;
   email: string;
   message: string;
+  cleaned_message?: string; // LLM-extracted content
   created_at: string;
   email_date?: string;
   subject?: string;

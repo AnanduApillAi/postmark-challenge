@@ -178,7 +178,8 @@ export async function POST(request: NextRequest) {
       sentiment_category: analysis.sentimentCategory,
       llm_processed_at: new Date().toISOString(),
       manual_review_needed: needsManualReview,
-      llm_reasoning: analysis.reasoning
+      llm_reasoning: analysis.reasoning,
+      cleaned_message: analysis.cleanedContent || testimonialData.message // Fallback to original if cleaning failed
     };
 
     // Only save if it passes LLM filtering criteria

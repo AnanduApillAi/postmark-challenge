@@ -6,7 +6,7 @@ export default function FixedBottomNav() {
   const [copiedItem, setCopiedItem] = useState('');
 
   const email = "testimonials@anandu.dev";
-  const templateContent = `This is a testimonial template. Tell us what you loved, how it helped you, or what made your experience special.`;
+  const templateContent = `Using this service has been a game-changer for my workflow. The [specific feature] in particular has saved me countless hours, and the overall simplicity is just fantastic. I honestly can't recommend it enough!`;
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -163,9 +163,38 @@ export default function FixedBottomNav() {
               </div>
 
               {/* Note */}
-              <p className="text-sm text-gray-400 text-left">
-                Send us your testimonial to <a href={`mailto:${email}`} className="text-gray-600 hover:text-blue-700">{email}</a> and we&rsquo;ll add it to our wall of love.
-              </p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 className="text-base font-semibold text-gray-800 mb-4 text-center">How It Works</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">1. Send Your Testimonial</p>
+                      <p className="text-sm text-gray-600">
+                        Simply copy the email address and send us your story from your favorite mail client.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2a2.83 2.83 0 0 0-2 5 2.83 2.83 0 0 0-5 2 2.83 2.83 0 0 0-2 5 2.83 2.83 0 0 0 2 5 2.83 2.83 0 0 0 5 2 2.83 2.83 0 0 0 2-5 2.83 2.83 0 0 0 5-2 2.83 2.83 0 0 0 2-5 2.83 2.83 0 0 0-2-5 2.83 2.83 0 0 0-5-2z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">2. AI-Powered Curation</p>
+                      <p className="text-sm text-gray-600">
+                        Our AI assistant will read and analyze your email to ensure it&rsquo;s a genuine testimonial.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

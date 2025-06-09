@@ -6,6 +6,7 @@ interface DatabaseTestimonial {
   name: string;
   email: string;
   message: string;
+  cleaned_message?: string; // LLM-extracted content
   created_at: string;
   email_date?: string;
   subject?: string;
@@ -55,7 +56,7 @@ export default function TestimonialsGrid({ testimonials, loading = false }: Test
             {leftColumn.map((testimonial) => (
               <TestimonialCardFrontend
                 key={testimonial.id}
-                quote={testimonial.message}
+                quote={testimonial.cleaned_message || testimonial.message}
                 author={testimonial.name}
                 avatar="" // No avatar for real testimonials
               />
@@ -67,7 +68,7 @@ export default function TestimonialsGrid({ testimonials, loading = false }: Test
             {rightColumn.map((testimonial) => (
               <TestimonialCardFrontend
                 key={testimonial.id}
-                quote={testimonial.message}
+                quote={testimonial.cleaned_message || testimonial.message}
                 author={testimonial.name}
                 avatar="" // No avatar for real testimonials
               />
