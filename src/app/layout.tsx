@@ -16,7 +16,12 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Wall of Love — Powered by Postmark ",
-  description: "A minimal, modern wall of love powered by Postmark’s inbound email streaming, filtered by AI, and stored with Supabase.",
+  description: "A minimal, modern wall of love powered by Postmark's inbound email streaming, filtered by AI, and stored with Supabase.",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
