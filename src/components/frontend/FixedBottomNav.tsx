@@ -62,7 +62,7 @@ export default function FixedBottomNav() {
             <button
               className="text-white hover:scale-110 transition-scale duration-200 cursor-pointer"
               title="View on GitHub"
-              onClick={() => window.open('https://github.com', '_blank')}
+              onClick={() => window.open('https://github.com/AnanduApillAi/postmark-challenge', '_blank')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
