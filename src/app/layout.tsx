@@ -15,8 +15,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Drop Us a Line - Testimonials",
-  description: "Send your testimonial via email and see it featured here.",
+  title: "Wall of Love — Powered by Postmark ",
+  description: "A minimal, modern wall of love powered by Postmark’s inbound email streaming, filtered by AI, and stored with Supabase.",
 };
 
 export default function RootLayout({
